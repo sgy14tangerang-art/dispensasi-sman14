@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Dispensasi - SMAN 14 TANGERANG</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif-official { font-family: 'Times New Roman', Times, serif; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printSection, #printSection * { visibility: visible; }
+            #printSection {
+                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 1cm 1.5cm; background: white; color: black;
+            }
+            .no-print { display: none !important; }
+            @page { size: A4 portrait; margin: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-blue-900 text-white shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1 rounded-lg shadow flex items-center justify-center">
+                    <!-- SVG LOGO BANTEN OFFLINE SAFE -->
+                    <svg class="h-10 w-8" viewBox="0 0 100 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="5" width="80" height="25" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+                        <text x="50" y="23" font-family="Arial" font-size="14" font-weight="bold" fill="#FF0000" text-anchor="middle">BANTEN</text>
+                        <path d="M10 32 C10 32, 10 90, 50 115 C90 90, 90 32, 90 32 Z" fill="#008037" stroke="#000000" stroke-width="2"/>
+                        <path d="M50 42 L56 50 L50 90 L44 50 Z" fill="#FFFFFF"/>
+                        <polygon points="50,38 52,43 57,43 53,46 55,51 50,48 45,51 47,46 43,43 48,43" fill="#FFD700"/>
+                        <path d="M22 80 C22 105, 78 105, 78 80 C78 102, 22 102, 22 80 Z" fill="#FFD700" stroke="#000000" stroke-width="1.5"/>
+                        <text x="50" y="94" font-family="Arial" font-size="8" font-weight="bold" fill="#000000" text-anchor="middle">IMAN TAQWA</text>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SMAN 14 TANGERANG</h1>
+                    <p class="text-xs text-blue-200">Sistem Informasi Dispensasi Siswa (Si-Dispensasi)</p>
+                </div>
+            </div>
+            <!-- Tab Navigation -->
+            <nav class="flex bg-blue-950/60 p-1 rounded-xl text-sm font-medium">
+                <button id="navFormBtn" onclick="switchTab('form')" class="px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-blue-200 hover:text-white">
+                    <span>Form Pengajuan</span>
+                </button>
+                <button id="navDashboardBtn" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 bg-blue-600 text-white shadow">
+                    <span>Dashboard TU</span>
+                    <span id="pendingBadge" class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full ml-1 hidden">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full no-print">
+        
+        <!-- SECTION 1: FORM PENGAJUAN -->
+        <section id="formSection" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200/80">
+            <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-6 text-white">
+                <h2 class="text-lg font-bold">Pengajuan Surat Dispensasi</h2>
+                <p class="text-xs text-blue-200">Isi formulir di bawah ini dengan data yang valid dan lengkap.</p>
+            </div>
+
+            <form id="dispensasiForm" onsubmit="handleFormSubmit(event)" class="p-6 md:p-8 space-y-6">
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider border-b pb-1">Identitas Siswa</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap Siswa <span class="text-red-500">*</span></label>
+                        <input type="text" id="namaSiswa" required placeholder="Contoh: SUGIYANTO" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">NIS / NISN <span class="text-red-500">*</span></label>
+                            <input type="text" id="nis" required placeholder="Contoh: 2324001560" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Kelas <span class="text-red-500">*</span></label>
+                            <input type="text" id="kelas" required placeholder="Ketik Kelas (Contoh: XI.E, X-1)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider border-b pb-1">Rincian Dispensasi & Jam Pelajaran</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal Mulai <span class="text-red-500">*</span></label>
+                            <input type="date" id="tglMulai" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal Selesai <span class="text-red-500">*</span></label>
+                            <input type="date" id="tglSelesai" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 space-y-3">
+                        <label class="block text-sm font-bold text-blue-900">Waktu Jam Pelajaran Dispensasi <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Dari Jam Pelajaran Ke-</label>
+                                <select id="jamMulai" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm outline-none">
+                                    <option value="Jam Ke-1">Jam Ke-1</option>
+                                    <option value="Jam Ke-2">Jam Ke-2</option>
+                                    <option value="Jam Ke-3">Jam Ke-3</option>
+                                    <option value="Jam Ke-4">Jam Ke-4</option>
+                                    <option value="Jam Ke-5">Jam Ke-5</option>
+                                    <option value="Jam Ke-6">Jam Ke-6</option>
+                                    <option value="Jam Ke-7">Jam Ke-7</option>
+                                    <option value="Jam Ke-8">Jam Ke-8</option>
+                                    <option value="Jam Ke-9">Jam Ke-9</option>
+                                    <option value="Jam Ke-10">Jam Ke-10</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Sampai Jam Pelajaran Ke-</label>
+                                <select id="jamSelesai" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm outline-none">
+                                    <option value="Jam Ke-6">Jam Ke-6</option>
+                                    <option value="Jam Ke-1">Jam Ke-1</option>
+                                    <option value="Jam Ke-2">Jam Ke-2</option>
+                                    <option value="Jam Ke-3">Jam Ke-3</option>
+                                    <option value="Jam Ke-4">Jam Ke-4</option>
+                                    <option value="Jam Ke-5">Jam Ke-5</option>
+                                    <option value="Jam Ke-7">Jam Ke-7</option>
+                                    <option value="Jam Ke-8">Jam Ke-8</option>
+                                    <option value="Jam Ke-9">Jam Ke-9</option>
+                                    <option value="Jam Ke-10">Jam Ke-10</option>
+                                    <option value="Selesai (Seharian)">Selesai (Seharian / Full)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Keperluan / Alasan Dispensasi <span class="text-red-500">*</span></label>
+                        <select id="kategoriAlasan" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none mb-2">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Lomba / Kompetisi">Lomba / Kompetisi</option>
+                            <option value="Kegiatan Ekstrakurikuler">Kegiatan Ekstrakurikuler</option>
+                            <option value="Tugas Dinas / LKS / OSIS">Tugas Dinas / LKS / OSIS</option>
+                            <option value="Urusan Keluarga Urgent">Urusan Keluarga Urgent</option>
+                            <option value="Lainnya">Lainnya...</option>
+                        </select>
+                        <textarea id="detailAlasan" required rows="3" placeholder="Jelaskan detail kegiatan/alasan dispensasi..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Kegiatan / Penyelenggara</label>
+                        <input type="text" id="namaKegiatan" placeholder="Contoh: Mengikuti Seminar (Pemerintah Kota Tangerang)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all">
+                    Kirim Pengajuan Dispensasi
+                </button>
+            </form>
+        </section>
+
+        <!-- SECTION 2: DASHBOARD STAF TU -->
+        <section id="dashboardSection" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Total Pengajuan</p>
+                    <h3 id="statTotal" class="text-2xl font-bold text-slate-800">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Menunggu Verifikasi</p>
+                    <h3 id="statPending" class="text-2xl font-bold text-amber-600">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Disetujui</p>
+                    <h3 id="statDisetujui" class="text-2xl font-bold text-emerald-600">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Ditolak</p>
+                    <h3 id="statDitolak" class="text-2xl font-bold text-rose-600">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Rekapitulasi Pengajuan Dispensasi</h2>
+                        <p class="text-xs text-slate-500">Kelola dan verifikasi surat dispensasi siswa SMAN 14 Tangerang.</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="Cari Nama / NIS / Kelas..." class="px-4 py-2 rounded-lg border border-slate-300 text-sm outline-none">
+                        <select id="filterStatus" onchange="renderTable()" class="px-3 py-2 rounded-lg border border-slate-300 text-sm outline-none">
+                            <option value="ALL">Semua Status</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="DISETUJUI">Disetujui</option>
+                            <option value="DITOLAK">Ditolak</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-4">No. Surat</th>
+                                <th class="py-3.5 px-4">Siswa & Kelas</th>
+                                <th class="py-3.5 px-4">Alasan & Waktu</th>
+                                <th class="py-3.5 px-4">Tgl Dispensasi</th>
+                                <th class="py-3.5 px-4 text-center">Status</th>
+                                <th class="py-3.5 px-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dispensasiTableBody" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- PRINT SECTION -->
+    <div id="printSection" class="hidden font-serif-official text-black">
+        <div class="flex items-center justify-between border-b-4 border-double border-black pb-3 mb-6">
+            <div class="w-28 flex justify-start items-center">
+                <!-- LOGO BANTEN OFFLINE GARANSI MUNCUL -->
+                <svg class="h-28 w-24" viewBox="0 0 100 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="5" width="80" height="25" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+                    <text x="50" y="23" font-family="Arial" font-size="14" font-weight="bold" fill="#FF0000" text-anchor="middle">BANTEN</text>
+                    <path d="M10 32 C10 32, 10 90, 50 115 C90 90, 90 32, 90 32 Z" fill="#008037" stroke="#000000" stroke-width="2"/>
+                    <path d="M50 42 L56 50 L50 90 L44 50 Z" fill="#FFFFFF"/>
+                    <polygon points="50,38 52,43 57,43 53,46 55,51 50,48 45,51 47,46 43,43 48,43" fill="#FFD700"/>
+                    <path d="M22 80 C22 105, 78 105, 78 80 C78 102, 22 102, 22 80 Z" fill="#FFD700" stroke="#000000" stroke-width="1.5"/>
+                    <text x="50" y="94" font-family="Arial" font-size="8" font-weight="bold" fill="#000000" text-anchor="middle">IMAN TAQWA</text>
+                </svg>
+            </div>
+
+            <div class="text-center flex-1 px-2">
+                <h3 class="text-base font-bold uppercase tracking-wider">PEMERINTAH PROVINSI BANTEN</h3>
+                <h2 class="text-lg font-bold uppercase tracking-wider">DINAS PENDIDIKAN DAN KEBUDAYAAN</h2>
+                <h1 class="text-2xl font-extrabold uppercase tracking-wide">SMA NEGERI 14 TANGERANG</h1>
+                <p class="text-xs leading-tight mt-1">
+                    Jl. Pembangunan I, Darussalam II, Kel. Batusari, Kec. Batuceper – Kota Tangerang<br>
+                    Kode Pos : 15121 Telp. (021) 59583557, NPSN : 20607501, NSS : 301 2861 05076<br>
+                    Website : <span class="underline">www.sman14tangerang.sch.id</span>, e-mail : <span class="underline">official@sman14tangerang.sch.id</span>
+                </p>
+            </div>
+
+            <div class="w-28"></div>
+        </div>
+
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold underline tracking-wide uppercase">SURAT DISPENSASI</h2>
+            <p class="text-sm mt-0.5" id="printNoSurat">Nomor: 422/001-SMAN 14 Tng/2026</p>
+        </div>
+
+        <div class="space-y-4 text-justify leading-relaxed text-base">
+            <p>Yang bertanda tangan di bawah ini Kepala SMA Negeri 14 Tangerang, memberikan izin dispensasi kepada siswa di bawah ini:</p>
+
+            <div class="my-4 ml-6 space-y-1.5">
+                <div class="flex"><span class="w-40 font-semibold">Nama Lengkap</span><span>: <span id="printNamaSiswa" class="font-bold"></span></span></div>
+                <div class="flex"><span class="w-40 font-semibold">NIS / NISN</span><span>: <span id="printNis"></span></span></div>
+                <div class="flex"><span class="w-40 font-semibold">Kelas</span><span>: <span id="printKelas"></span></span></div>
+            </div>
+
+            <p>Untuk tidak mengikuti kegiatan Pembelajaran di sekolah dikarenakan mengikuti kegiatan <strong id="printKategoriAlasan"></strong> dalam rangka <strong id="printDetailAlasan"></strong> (<span id="printNamaKegiatan"></span>).</p>
+
+            <p>Dispensasi ini diberikan untuk jangka waktu:</p>
+            <div class="my-2 ml-6 space-y-1">
+                <div class="flex"><span class="w-40 font-semibold">Tanggal</span><span>: <span id="printTanggal"></span></span></div>
+                <div class="flex"><span class="w-40 font-semibold">Pada Jam Pelajaran</span><span>: <span id="printJamPelajaran" class="font-bold"></span></span></div>
+            </div>
+
+            <p>Demikian surat dispensasi ini diberikan agar dapat dipergunakan sebagaimana mestinya, dan kepada pihak yang berkepentingan mohon dapat maklum.</p>
+        </div>
+
+        <div class="mt-12 flex justify-end">
+            <div class="text-center w-72">
+                <p>Tangerang, <span id="printTglSurat"></span></p>
+                <p class="font-semibold">Kepala SMAN 14 Tangerang,</p>
+                <div class="h-24"></div>
+                <p class="font-bold underline">Ade Gunawan, S.Pd., M.M.</p>
+                <p class="text-xs">Pembina Tk. I, IV/b</p>
+                <p class="text-xs">NIP. 19770520 200312 1 007</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="successModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+            <h3 class="text-xl font-bold text-slate-800">Pengajuan Terkirim!</h3>
+            <p class="text-sm text-slate-600">Surat pengajuan dispensasi telah masuk ke sistem TU SMAN 14 Tangerang.</p>
+            <div class="bg-slate-50 p-3 rounded-lg border text-left text-xs font-mono text-slate-600">
+                <p><span class="font-bold">Kode Resi:</span> <span id="modalResiCode"></span></p>
+                <p><span class="font-bold">Nama:</span> <span id="modalNama"></span></p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        // Menggunakan Kunci Utama agar data tidak hilang-hilang lagi
+        const STORAGE_KEY = 'SMAN14_DISPENSASI_MAIN_DATA';
+
+        const sampleData = [
+            {
+                id: 'DSP-1001',
+                noSurat: '422/001-SMAN 14 Tng/2026',
+                namaSiswa: 'SUGIYANTO',
+                nis: '2324001560',
+                kelas: 'XI.E',
+                kategoriAlasan: 'Tugas Dinas / LKS / OSIS',
+                detailAlasan: 'Mengikuti Seminar',
+                namaKegiatan: 'Pemerintah Kota Tangerang',
+                tglMulai: '2026-10-08',
+                tglSelesai: '2026-10-09',
+                jamMulai: 'Jam Ke-1',
+                jamSelesai: 'Jam Ke-6',
+                status: 'DISETUJUI',
+                created: '2026-10-08'
+            }
+        ];
+
+        let dataDispensasi = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sampleData;
+
+        function initApp() {
+            saveData();
+            renderTable();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataDispensasi));
+            updateStats();
+        }
+
+        function switchTab(tab) {
+            const formSec = document.getElementById('formSection');
+            const dashSec = document.getElementById('dashboardSection');
+            const navFormBtn = document.getElementById('navFormBtn');
+            const navDashBtn = document.getElementById('navDashboardBtn');
+
+            if (tab === 'form') {
+                formSec.classList.remove('hidden');
+                dashSec.classList.add('hidden');
+                navFormBtn.className = "px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 bg-blue-600 text-white shadow";
+                navDashBtn.className = "px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-blue-200 hover:text-white";
+            } else {
+                formSec.classList.add('hidden');
+                dashSec.classList.remove('hidden');
+                navDashBtn.className = "px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 bg-blue-600 text-white shadow";
+                navFormBtn.className = "px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-blue-200 hover:text-white";
+                renderTable();
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const count = dataDispensasi.length + 1;
+            const formattedNo = String(count).padStart(3, '0');
+            const noSuratResmi = `422/${formattedNo}-SMAN 14 Tng/2026`;
+
+            const itemBaru = {
+                id: 'DSP-' + Date.now().toString().slice(-4),
+                noSurat: noSuratResmi,
+                namaSiswa: document.getElementById('namaSiswa').value,
+                nis: document.getElementById('nis').value,
+                kelas: document.getElementById('kelas').value,
+                kategoriAlasan: document.getElementById('kategoriAlasan').value,
+                detailAlasan: document.getElementById('detailAlasan').value,
+                namaKegiatan: document.getElementById('namaKegiatan').value || '-',
+                tglMulai: document.getElementById('tglMulai').value,
+                tglSelesai: document.getElementById('tglSelesai').value,
+                jamMulai: document.getElementById('jamMulai').value,
+                jamSelesai: document.getElementById('jamSelesai').value,
+                status: 'PENDING',
+                created: new Date().toISOString().split('T')[0]
+            };
+
+            dataDispensasi.unshift(itemBaru);
+            saveData();
+
+            document.getElementById('modalResiCode').innerText = itemBaru.id;
+            document.getElementById('modalNama').innerText = itemBaru.namaSiswa;
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+
+            document.getElementById('dispensasiForm').reset();
+            renderTable();
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+            switchTab('dashboard');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('dispensasiTableBody');
+            if (!tbody) return;
+
+            const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const filterStatus = document.getElementById('filterStatus')?.value || 'ALL';
+
+            tbody.innerHTML = '';
+
+            const filteredData = dataDispensasi.filter(item => {
+                const matchesSearch = (item.namaSiswa && item.namaSiswa.toLowerCase().includes(search)) || 
+                                      (item.nis && item.nis.toLowerCase().includes(search)) ||
+                                      (item.kelas && item.kelas.toLowerCase().includes(search));
+                const matchesStatus = filterStatus === 'ALL' || item.status === filterStatus;
+                return matchesSearch && matchesStatus;
+            });
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Tidak ada data pengajuan.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                let badgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                if (item.status === 'DISETUJUI') badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                if (item.status === 'DITOLAK') badgeClass = 'bg-rose-100 text-rose-800 border-rose-200';
+
+                const jamKet = item.jamMulai ? `${item.jamMulai} s.d. ${item.jamSelesai}` : 'Jam Ke-1 s.d. Jam Ke-6';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-mono text-xs text-slate-600 font-semibold">${item.noSurat}</td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-bold text-slate-800">${item.namaSiswa}</div>
+                        <div class="text-xs text-slate-500">NIS: ${item.nis} | <span class="bg-blue-100 text-blue-800 font-semibold px-1.5 py-0.5 rounded">${item.kelas}</span></div>
+                    </td>
+                    <td class="py-3.5 px-4 max-w-xs">
+                        <div class="text-xs font-semibold text-blue-700">${item.kategoriAlasan}</div>
+                        <div class="text-xs text-slate-600 truncate">${item.detailAlasan}</div>
+                        <div class="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded inline-block mt-0.5">${jamKet}</div>
+                    </td>
+                    <td class="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600">
+                        ${formatTanggalIndo(item.tglMulai)} ${item.tglMulai !== item.tglSelesai ? '<br>s/d ' + formatTanggalIndo(item.tglSelesai) : ''}
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                        <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full border ${badgeClass}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center gap-2">
+                            ${item.status === 'PENDING' ? `
+                                <button onclick="updateStatus('${item.id}', 'DISETUJUI')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold">Setujui</button>
+                                <button onclick="updateStatus('${item.id}', 'DITOLAK')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold">Tolak</button>
+                            ` : ''}
+
+                            ${item.status === 'DISETUJUI' ? `
+                                <button onclick="cetakSurat('${item.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow">Cetak Surat</button>
+                            ` : ''}
+
+                            <button onclick="hapusData('${item.id}')" class="px-2 py-1 text-slate-400 hover:text-rose-600 text-xs font-bold">Hapus</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStats() {
+            const total = dataDispensasi.length;
+            const pending = dataDispensasi.filter(d => d.status === 'PENDING').length;
+            const disetujui = dataDispensasi.filter(d => d.status === 'DISETUJUI').length;
+            const ditolak = dataDispensasi.filter(d => d.status === 'DITOLAK').length;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statDisetujui').innerText = disetujui;
+            document.getElementById('statDitolak').innerText = ditolak;
+
+            const badge = document.getElementById('pendingBadge');
+            if (pending > 0) {
+                badge.innerText = pending;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function updateStatus(id, newStatus) {
+            const index = dataDispensasi.findIndex(d => d.id === id);
+            if (index !== -1) {
+                dataDispensasi[index].status = newStatus;
+                saveData();
+                renderTable();
+            }
+        }
+
+        function hapusData(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                dataDispensasi = dataDispensasi.filter(d => d.id !== id);
+                saveData();
+                renderTable();
+            }
+        }
+
+        function cetakSurat(id) {
+            const item = dataDispensasi.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById('printNoSurat').innerText = `Nomor: ${item.noSurat}`;
+            document.getElementById('printNamaSiswa').innerText = item.namaSiswa;
+            document.getElementById('printNis').innerText = item.nis;
+            document.getElementById('printKelas').innerText = item.kelas;
+            document.getElementById('printKategoriAlasan').innerText = item.kategoriAlasan;
+            document.getElementById('printDetailAlasan').innerText = item.detailAlasan;
+            document.getElementById('printNamaKegiatan').innerText = item.namaKegiatan !== '-' ? item.namaKegiatan : 'kegiatan sekolah';
+
+            let tglText = formatTanggalIndo(item.tglMulai);
+            if (item.tglMulai !== item.tglSelesai) {
+                tglText += ` s.d. ${formatTanggalIndo(item.tglSelesai)}`;
+            }
+            document.getElementById('printTanggal').innerText = tglText;
+
+            let jamText = item.jamMulai ? `${item.jamMulai} s.d. ${item.jamSelesai}` : 'Jam Ke-1 s.d. Jam Ke-6';
+            document.getElementById('printJamPelajaran').innerText = jamText;
+
+            document.getElementById('printTglSurat').innerText = formatTanggalIndo(new Date().toISOString().split('T')[0]);
+
+            const printSec = document.getElementById('printSection');
+            printSec.classList.remove('hidden');
+            window.print();
+            printSec.classList.add('hidden');
+        }
+
+        function formatTanggalIndo(dateStr) {
+            if (!dateStr) return '';
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
